@@ -1,0 +1,6 @@
+set PATH= %PATH %; %ProgramFiles %\MSBuild
+
+msbuild helloworld.csproj -t:Build.
+
+
+MSBuild C:\GameStore\GameStrore.WebUI\gamestore.webui.csproj /p:deployonbuild=true;publishprofile=C:\GameStore\GameStrore.WebUI\Properties\PublishProfiles\folderprofile.pubxml
