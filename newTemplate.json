@@ -26,12 +26,15 @@
         },
         "GameStoreWebServerWindowsOSVersion": {
             "type": "string",
-            "defaultValue": "2012-R2-Datacenter",
+            "defaultValue": "2016-Datacenter",
             "allowedValues": [
                 "2008-R2-SP1",
                 "2012-Datacenter",
                 "2012-R2-Datacenter",
-                "Windows-Server-Technical-Preview"
+                "2016-Nano-Server",
+                "2016-Datacenter-with-Containers",
+                "2016-Datacenter",
+                "2019-Datacenter"
             ]
         },
         "GameStoreSQLServerAdminLogin": {
@@ -74,6 +77,23 @@
             "metadata": {
                 "description": "Describes the performance level for Edition"
             }
+        },
+        "webSrvVMSize": {
+            "type": "string",
+            "allowedValues": [
+                "Standard_DS1",
+                "Standard_D2_v2",
+                "Standard_DS3",
+                "Standard_DS4",
+                "Standard_DS11",
+                "Standard_DS12",
+                "Standard_DS13",
+                "Standard_DS14"
+            ],
+            "metadata": {
+                "description": "The size of the Web Server VMs Created"
+            },
+            "defaultValue": "Standard_D2_v2"
         }
     },
     "resources": [
@@ -241,7 +261,7 @@
         }
     ],
     "variables": {
-        "GameStoreStorageAccountName": "[concat('GameStoreStorageAccount', uniqueString(resourceGroup().id))]",
+        "GameStoreStorageAccountName": "[concat('gssan', uniqueString(resourceGroup().id))]",
         "GameStoreFrontNetworkPrefix": "10.0.0.0/16",
         "GameStoreFrontNetworkSubnet1Name": "Subnet-1",
         "GameStoreFrontNetworkSubnet1Prefix": "10.0.0.0/24",
@@ -250,12 +270,12 @@
         "GameStoreWebServerImagePublisher": "MicrosoftWindowsServer",
         "GameStoreWebServerImageOffer": "WindowsServer",
         "GameStoreWebServerOSDiskName": "GameStoreWebServerOSDisk",
-        "GameStoreWebServerVmSize": "Standard_D1",
+        "GameStoreWebServerVmSize": "[parameters('webSrvVMSize')]",
         "GameStoreWebServerVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'GameStoreFrontNetwork')]",
         "GameStoreWebServerSubnetRef": "[concat(variables('GameStoreWebServerVnetID'), '/subnets/', variables('GameStoreFrontNetworkSubnet1Name'))]",
         "GameStoreWebServerStorageAccountContainerName": "vhds",
         "GameStoreWebServerNicName": "[concat(parameters('GameStoreWebServerName'), 'NetworkInterface')]",
-        "GameStoreSQLServerName": "[concat('GameStoreSQLServer', uniqueString(resourceGroup().id))]",
+        "GameStoreSQLServerName": "[concat('gamestorsqlserver', uniqueString(resourceGroup().id))]",
         "fullyQualifiedGameSroreName": "[concat(variables('GameStoreSQLServerName'), '/', parameters('GameSroreName'))]"
     }
 }

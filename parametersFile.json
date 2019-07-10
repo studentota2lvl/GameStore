@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "GameStoreStorageAccountType": {
+      "value": "Standard_LRS"
+    },
+    "GameStoreWebServerName": {
+      "value": "websrv"
+    },
+    "GameStoreWebServerAdminUserName": {
+      "value": "arudy"
+    },
+    "GameStoreWebServerAdminPassword": {
+      "value": "m15lefeg_AnDrYe_^)2"
+    },
+    "GameStoreWebServerWindowsOSVersion": {
+      "value": "2016-Datacenter"
+    },
+    "GameStoreSQLServerAdminLogin": {
+      "value": "arudy"
+    },
+    "GameStoreSQLServerAdminLoginPassword": {
+      "value": "m15lefeg_AnDrYe_^)2"
+    },
+    "GameSroreName": {
+      "value": "gamestore"
+    },
+    "GameSroreCollation": {
+      "value": "SQL_Latin1_General_CP1_CI_AS"
+    },
+    "GameSroreEdition": {
+      "value": "Basic"
+    },
+    "GameSroreRequestedServiceObjectiveName": {
+      "value": "Basic"
+    },
+    "webSrvVMSize": {
+      "value": "Standard_D2_v2"
+    }
+  }
+}
