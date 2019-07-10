@@ -38,6 +38,12 @@ steps:
     SourceFolder: './db'
     Contents: '*.bacpac'
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '.'
+    Contents: '*.json'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
     
 - task: PublishPipelineArtifact@0
   inputs:
