@@ -1,0 +1,261 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "GameStoreStorageAccountType": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_ZRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Premium_LRS"
+            ]
+        },
+        "GameStoreWebServerName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "GameStoreWebServerAdminUserName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "GameStoreWebServerAdminPassword": {
+            "type": "securestring"
+        },
+        "GameStoreWebServerWindowsOSVersion": {
+            "type": "string",
+            "defaultValue": "2012-R2-Datacenter",
+            "allowedValues": [
+                "2008-R2-SP1",
+                "2012-Datacenter",
+                "2012-R2-Datacenter",
+                "Windows-Server-Technical-Preview"
+            ]
+        },
+        "GameStoreSQLServerAdminLogin": {
+            "type": "string",
+            "minLength": 1
+        },
+        "GameStoreSQLServerAdminLoginPassword": {
+            "type": "securestring"
+        },
+        "GameSroreName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "GameSroreCollation": {
+            "type": "string",
+            "minLength": 1,
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "GameSroreEdition": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ]
+        },
+        "GameSroreRequestedServiceObjectiveName": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "S0",
+                "S1",
+                "S2",
+                "P1",
+                "P2",
+                "P3"
+            ],
+            "metadata": {
+                "description": "Describes the performance level for Edition"
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('GameStoreStorageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "GameStoreStorageAccount"
+            },
+            "properties": {
+                "accountType": "[parameters('GameStoreStorageAccountType')]"
+            }
+        },
+        {
+            "name": "GameStoreFrontNetwork",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "GameStoreFrontNetwork"
+            },
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('GameStoreFrontNetworkPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('GameStoreFrontNetworkSubnet1Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('GameStoreFrontNetworkSubnet1Prefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('GameStoreFrontNetworkSubnet2Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('GameStoreFrontNetworkSubnet2Prefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('GameStoreWebServerNicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', 'GameStoreFrontNetwork')]"
+            ],
+            "tags": {
+                "displayName": "GameStoreWebServerNic"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('GameStoreWebServerSubnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[parameters('GameStoreWebServerName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('GameStoreStorageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('GameStoreWebServerNicName'))]"
+            ],
+            "tags": {
+                "displayName": "GameStoreWebServer"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('GameStoreWebServerVmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('GameStoreWebServerName')]",
+                    "adminUsername": "[parameters('GameStoreWebServerAdminUsername')]",
+                    "adminPassword": "[parameters('GameStoreWebServerAdminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('GameStoreWebServerImagePublisher')]",
+                        "offer": "[variables('GameStoreWebServerImageOffer')]",
+                        "sku": "[parameters('GameStoreWebServerWindowsOSVersion')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "name": "GameStoreWebServerOSDisk",
+                        "vhd": {
+                            "uri": "[concat('http://', variables('GameStoreStorageAccountName'), '.blob.core.windows.net/', variables('GameStoreWebServerStorageAccountContainerName'), '/', variables('GameStoreWebServerOSDiskName'), '.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('GameStoreWebServerNicName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "[variables('GameStoreSQLServerName')]",
+            "type": "Microsoft.Sql/servers",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2014-04-01-preview",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "GameStoreSQLServer"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('GameStoreSQLServerAdminLogin')]",
+                "administratorLoginPassword": "[parameters('GameStoreSQLServerAdminLoginPassword')]"
+            },
+            "resources": [
+                {
+                    "name": "AllowAllWindowsAzureIps",
+                    "type": "firewallrules",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', variables('GameStoreSQLServerName'))]"
+                    ],
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "0.0.0.0"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[variables('fullyQualifiedGameSroreName')]",
+            "type": "Microsoft.Sql/servers/databases",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2014-04-01-preview",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('GameStoreSQLServerName'))]"
+            ],
+            "tags": {
+                "displayName": "GameSrore"
+            },
+            "properties": {
+                "collation": "[parameters('GameSroreCollation')]",
+                "edition": "[parameters('GameSroreEdition')]",
+                "maxSizeBytes": "1073741824",
+                "requestedServiceObjectiveName": "[parameters('GameSroreRequestedServiceObjectiveName')]"
+            }
+        }
+    ],
+    "variables": {
+        "GameStoreStorageAccountName": "[concat('GameStoreStorageAccount', uniqueString(resourceGroup().id))]",
+        "GameStoreFrontNetworkPrefix": "10.0.0.0/16",
+        "GameStoreFrontNetworkSubnet1Name": "Subnet-1",
+        "GameStoreFrontNetworkSubnet1Prefix": "10.0.0.0/24",
+        "GameStoreFrontNetworkSubnet2Name": "Subnet-2",
+        "GameStoreFrontNetworkSubnet2Prefix": "10.0.1.0/24",
+        "GameStoreWebServerImagePublisher": "MicrosoftWindowsServer",
+        "GameStoreWebServerImageOffer": "WindowsServer",
+        "GameStoreWebServerOSDiskName": "GameStoreWebServerOSDisk",
+        "GameStoreWebServerVmSize": "Standard_D1",
+        "GameStoreWebServerVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'GameStoreFrontNetwork')]",
+        "GameStoreWebServerSubnetRef": "[concat(variables('GameStoreWebServerVnetID'), '/subnets/', variables('GameStoreFrontNetworkSubnet1Name'))]",
+        "GameStoreWebServerStorageAccountContainerName": "vhds",
+        "GameStoreWebServerNicName": "[concat(parameters('GameStoreWebServerName'), 'NetworkInterface')]",
+        "GameStoreSQLServerName": "[concat('GameStoreSQLServer', uniqueString(resourceGroup().id))]",
+        "fullyQualifiedGameSroreName": "[concat(variables('GameStoreSQLServerName'), '/', parameters('GameSroreName'))]"
+    }
+}

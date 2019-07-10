@@ -731,3 +731,656 @@
         }
     }
 }
+
+
+
+// ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±edited±±±±±±±±±±±±±±±±±±±±±±±±±§
+//[
+//    {
+//        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+//        "contentVersion": "1.0.0.0",
+//        "parameters": {
+//            "adminUsername": {
+//                "type": "string",
+//                "metadata": {
+//                    "description": "Username for the Virtual Machine."
+//                }
+//            },
+//            "adminPassword": {
+//                "type": "securestring",
+//                "metadata": {
+//                    "description": "Password for the Virtual Machine."
+//                }
+//            },
+//            "dnsLabelPrefix": {
+//                "type": "string",
+//                "metadata": {
+//                    "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+//                }
+//            },
+//            "windowsOSVersion": {
+//                "type": "string",
+//                "defaultValue": "2016-Datacenter",
+//                "allowedValues": [
+//                    "2008-R2-SP1",
+//                    "2012-Datacenter",
+//                    "2012-R2-Datacenter",
+//                    "2016-Nano-Server",
+//                    "2016-Datacenter-with-Containers",
+//                    "2016-Datacenter",
+//                    "2019-Datacenter"
+//                ],
+//                "metadata": {
+//                    "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
+//                }
+//            },
+//            "location": {
+//                "type": "string",
+//                "defaultValue": "[resourceGroup().location]",
+//                "metadata": {
+//                    "description": "Location for all resources."
+//                }
+//            },
+//            "GameStoreSQLServerAdminLogin": {
+//                "type": "string",
+//                "minLength": 1
+//            },
+//            "GameStoreSQLServerAdminLoginPassword": {
+//                "type": "securestring"
+//            },
+//            "GameStoreName": {
+//                "type": "string",
+//                "minLength": 1
+//            },
+//            "GameStoreCollation": {
+//                "type": "string",
+//                "minLength": 1,
+//                "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+//            },
+//            "GameStoreEdition": {
+//                "type": "string",
+//                "defaultValue": "Basic",
+//                "allowedValues": [
+//                    "Basic",
+//                    "Standard",
+//                    "Premium"
+//                ]
+//            },
+//            "GameStoreRequestedServiceObjectiveName": {
+//                "type": "string",
+//                "defaultValue": "Basic",
+//                "allowedValues": [
+//                    "Basic",
+//                    "S0",
+//                    "S1",
+//                    "S2",
+//                    "P1",
+//                    "P2",
+//                    "P3"
+//                ],
+//                "metadata": {
+//                    "description": "Describes the performance level for Edition"
+//                }
+//            },
+//            "DeploymentGroup": {
+//                "type": "string",
+//                "minLength": 1,
+//                "defaultValue": "[concat(parameters('GameStoreName')), 'Group']"
+//            },
+//            "TeamProject": {
+//                "type": "string",
+//                "minLength": 1,
+//                "defaultValue": "test"
+//            },
+//            "VSTSAccountName": {
+//                "type": "string",
+//                "minLength": 1,
+//                "defaultValue": "arudy0539"
+//            },
+//            "PATToken": {
+//                "type": "securestring",
+//                "minLength": 1,
+//                "defaultValue": "wernctexn33j6hlbj2i2jnqdcdqlqesmbbwwoyn5iqmiomof7boa"
+//            }
+//        },
+//        "variables": {
+//            "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sawinvm')]",
+//            "nicName": "myVMNic",
+//            "addressPrefix": "10.0.0.0/16",
+//            "subnetName": "Subnet",
+//            "subnetPrefix": "10.0.0.0/24",
+//            "publicIPAddressName": "myPublicIP",
+//            "vmName": "SimpleWinVM",
+//            "virtualNetworkName": "MyVNET",
+//            "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
+//            "GameStoreSQLServerName": "[concat('GameStoreSQLServer', uniqueString(resourceGroup().id))]",
+//            "fullyQualifiedGameStoreName": "[concat(variables('GameStoreSQLServerName'), '/', parameters('GameStoreName'))]"
+//        },
+//        "resources": [
+//            {
+//                "type": "Microsoft.Storage/storageAccounts",
+//                "apiVersion": "2018-11-01",
+//                "name": "[variables('storageAccountName')]",
+//                "location": "[parameters('location')]",
+//                "sku": {
+//                    "name": "Standard_LRS"
+//                },
+//                "kind": "Storage",
+//                "properties": {}
+//            },
+//            {
+//                "type": "Microsoft.Network/publicIPAddresses",
+//                "apiVersion": "2018-11-01",
+//                "name": "[variables('publicIPAddressName')]",
+//                "location": "[parameters('location')]",
+//                "properties": {
+//                    "publicIPAllocationMethod": "Dynamic",
+//                    "dnsSettings": {
+//                        "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+//                    }
+//                }
+//            },
+//            {
+//                "type": "Microsoft.Network/virtualNetworks",
+//                "apiVersion": "2018-11-01",
+//                "name": "[variables('virtualNetworkName')]",
+//                "location": "[parameters('location')]",
+//                "properties": {
+//                    "addressSpace": {
+//                        "addressPrefixes": [
+//                            "[variables('addressPrefix')]"
+//                        ]
+//                    },
+//                    "subnets": [
+//                        {
+//                            "name": "[variables('subnetName')]",
+//                            "properties": {
+//                                "addressPrefix": "[variables('subnetPrefix')]"
+//                            }
+//                        }
+//                    ]
+//                }
+//            },
+//            {
+//                "type": "Microsoft.Network/networkInterfaces",
+//                "apiVersion": "2018-11-01",
+//                "name": "[variables('nicName')]",
+//                "location": "[parameters('location')]",
+//                "dependsOn": [
+//                    "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+//                    "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+//                ],
+//                "properties": {
+//                    "ipConfigurations": [
+//                        {
+//                            "name": "ipconfig1",
+//                            "properties": {
+//                                "privateIPAllocationMethod": "Dynamic",
+//                                "publicIPAddress": {
+//                                    "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+//                                },
+//                                "subnet": {
+//                                    "id": "[variables('subnetRef')]"
+//                                }
+//                            }
+//                        }
+//                    ]
+//                }
+//            },
+//            {
+//                "type": "Microsoft.Compute/virtualMachines",
+//                "apiVersion": "2018-10-01",
+//                "name": "[variables('vmName')]",
+//                "location": "[parameters('location')]",
+//                "dependsOn": [
+//                    "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+//                    "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+//                ],
+//                "properties": {
+//                    "hardwareProfile": {
+//                        "vmSize": "Standard_A2"
+//                    },
+//                    "osProfile": {
+//                        "computerName": "[variables('vmName')]",
+//                        "adminUsername": "[parameters('adminUsername')]",
+//                        "adminPassword": "[parameters('adminPassword')]"
+//                    },
+//                    "storageProfile": {
+//                        "imageReference": {
+//                            "publisher": "MicrosoftWindowsServer",
+//                            "offer": "WindowsServer",
+//                            "sku": "[parameters('windowsOSVersion')]",
+//                            "version": "latest"
+//                        },
+//                        "osDisk": {
+//                            "createOption": "FromImage"
+//                        },
+//                        "dataDisks": [
+//                            {
+//                                "diskSizeGB": 1023,
+//                                "lun": 0,
+//                                "createOption": "Empty"
+//                            }
+//                        ]
+//                    },
+//                    "networkProfile": {
+//                        "networkInterfaces": [
+//                            {
+//                                "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+//                            }
+//                        ]
+//                    },
+//                    "diagnosticsProfile": {
+//                        "bootDiagnostics": {
+//                            "enabled": true,
+//                            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))).primaryEndpoints.blob]"
+//                        }
+//                    }
+//                }
+//            },
+//            {
+//                "name": "[concat(parameters('vmNamePrefix'),copyIndex(),'/TeamServicesAgent')]",
+//                "type": "Microsoft.Compute/virtualMachines/extensions",
+//                "location": "[parameters('location')]",
+//                "apiVersion": "2015-06-15",
+//                "dependsOn": [
+//                    "[resourceId('Microsoft.Compute/virtualMachines/',concat(parameters('vmNamePrefix'),copyindex()))]"
+//                ],
+//                "properties": {
+//                    "publisher": "Microsoft.VisualStudio.Services",
+//                    "type": "TeamServicesAgent",
+//                    "typeHandlerVersion": "1.0",
+//                    "autoUpgradeMinorVersion": true,
+//                    "settings": {
+//                        "VSTSAccountName": "[parameters('VSTSAccountName')]",
+//                        "TeamProject": "[parameters('TeamProject')]",
+//                        "DeploymentGroup": "[parameters('DeploymentGroup')]",
+//                        "AgentName": "[parameters('AgentName')]",
+//                        "Tags": "[parameters('Tags')]"
+//                    },
+//                    "protectedSettings": {
+//                        "PATToken": "[parameters('PATToken')]"
+//                    }
+//                }
+//            },
+//            {
+//                "name": "[variables('GameStoreSQLServerName')]",
+//                "type": "Microsoft.Sql/servers",
+//                "location": "[resourceGroup().location]",
+//                "apiVersion": "2014-04-01-preview",
+//                "dependsOn": [],
+//                "tags": {
+//                    "displayName": "GameStoreSQLServer"
+//                },
+//                "properties": {
+//                    "administratorLogin": "[parameters('GameStoreSQLServerAdminLogin')]",
+//                    "administratorLoginPassword": "[parameters('GameStoreSQLServerAdminLoginPassword')]"
+//                },
+//                "resources": [
+//                    {
+//                        "name": "AllowAllWindowsAzureIps",
+//                        "type": "firewallrules",
+//                        "location": "[resourceGroup().location]",
+//                        "apiVersion": "2014-04-01-preview",
+//                        "dependsOn": [
+//                            "[concat('Microsoft.Sql/servers/', variables('GameStoreSQLServerName'))]"
+//                        ],
+//                        "properties": {
+//                            "startIpAddress": "0.0.0.0",
+//                            "endIpAddress": "0.0.0.0"
+//                        }
+//                    }
+//                ]
+//            },
+//            {
+//                "name": "[variables('fullyQualifiedGameStoreName')]",
+//                "type": "Microsoft.Sql/servers/databases",
+//                "location": "[resourceGroup().location]",
+//                "apiVersion": "2014-04-01-preview",
+//                "dependsOn": [
+//                    "[resourceId('Microsoft.Sql/servers', variables('GameStoreSQLServerName'))]"
+//                ],
+//                "tags": {
+//                    "displayName": "GameStore"
+//                },
+//                "properties": {
+//                    "collation": "[parameters('GameStoreCollation')]",
+//                    "edition": "[parameters('GameStoreEdition')]",
+//                    "maxSizeBytes": "1073741824",
+//                    "requestedServiceObjectiveName": "[parameters('GameStoreRequestedServiceObjectiveName')]"
+//                }
+//            }
+//        ],
+//        "outputs": {
+//            "hostname": {
+//                "type": "string",
+//                "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
+//            }
+//        }
+//    }
+//]
+
+
+
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "Username for the Virtual Machine."
+            }
+        },
+        "adminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the Virtual Machine."
+            }
+        },
+        "dnsLabelPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
+        },
+        "windowsOSVersion": {
+            "type": "string",
+            "defaultValue": "2016-Datacenter",
+            "allowedValues": [
+                "2008-R2-SP1",
+                "2012-Datacenter",
+                "2012-R2-Datacenter",
+                "2016-Nano-Server",
+                "2016-Datacenter-with-Containers",
+                "2016-Datacenter",
+                "2019-Datacenter"
+            ],
+            "metadata": {
+                "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "GameStoreSQLServerAdminLogin": {
+            "type": "string",
+            "minLength": 1
+        },
+        "GameStoreSQLServerAdminLoginPassword": {
+            "type": "securestring"
+        },
+        "GameStoreName": {
+            "type": "string",
+            "minLength": 1
+        },
+        "GameStoreCollation": {
+            "type": "string",
+            "minLength": 1,
+            "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+        },
+        "GameStoreEdition": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+            ]
+        },
+        "GameStoreRequestedServiceObjectiveName": {
+            "type": "string",
+            "defaultValue": "Basic",
+            "allowedValues": [
+                "Basic",
+                "S0",
+                "S1",
+                "S2",
+                "P1",
+                "P2",
+                "P3"
+            ],
+            "metadata": {
+                "description": "Describes the performance level for Edition"
+            }
+        },
+        "DeploymentGroup": {
+            "type": "string",
+            "minLength": 1,
+            "defaultValue": "default deployment group"
+        },
+        "TeamProject": {
+            "type": "string",
+            "minLength": 1,
+            "defaultValue": "test"
+        },
+        "VSTSAccountName": {
+            "type": "string",
+            "minLength": 1,
+            "defaultValue": "arudy0539"
+        },
+        "PATToken": {
+            "type": "securestring",
+            "minLength": 1,
+            "defaultValue": "wernctexn33j6hlbj2i2jnqdcdqlqesmbbwwoyn5iqmiomof7boa"
+        }
+    },
+    "variables": {
+        "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sawinvm')]",
+        "nicName": "myVMNic",
+        "addressPrefix": "10.0.0.0/16",
+        "subnetName": "Subnet",
+        "subnetPrefix": "10.0.0.0/24",
+        "publicIPAddressName": "myPublicIP",
+        "vmName": "SimpleWinVM",
+        "virtualNetworkName": "MyVNET",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
+        "GameStoreSQLServerName": "[concat('GameStoreSQLServer', uniqueString(resourceGroup().id))]",
+        "fullyQualifiedGameStoreName": "[concat(variables('GameStoreSQLServerName'), '/', parameters('GameStoreName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage",
+            "properties": {}
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('virtualNetworkName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('nicName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-10-01",
+            "name": "[variables('vmName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_A2"
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "[parameters('windowsOSVersion')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage"
+                    },
+                    "dataDisks": [
+                        {
+                            "diskSizeGB": 1023,
+                            "lun": 0,
+                            "createOption": "Empty"
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))).primaryEndpoints.blob]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[concat(parameters('dnsLabelPrefix'),'/TeamServicesAgent')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "[parameters('location')]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.VisualStudio.Services",
+                "type": "TeamServicesAgent",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "VSTSAccountName": "[parameters('VSTSAccountName')]",
+                    "TeamProject": "[parameters('TeamProject')]",
+                    "DeploymentGroup": "[parameters('DeploymentGroup')]",
+                    "AgentName": "[parameters('AgentName')]",
+                    "Tags": "[parameters('Tags')]"
+                },
+                "protectedSettings": {
+                    "PATToken": "[parameters('PATToken')]"
+                }
+            }
+        },
+        {
+            "name": "[variables('GameStoreSQLServerName')]",
+            "type": "Microsoft.Sql/servers",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2014-04-01-preview",
+            "dependsOn": [],
+            "tags": {
+                "displayName": "GameStoreSQLServer"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('GameStoreSQLServerAdminLogin')]",
+                "administratorLoginPassword": "[parameters('GameStoreSQLServerAdminLoginPassword')]"
+            },
+            "resources": [
+                {
+                    "name": "AllowAllWindowsAzureIps",
+                    "type": "firewallrules",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', variables('GameStoreSQLServerName'))]"
+                    ],
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "0.0.0.0"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[variables('fullyQualifiedGameStoreName')]",
+            "type": "Microsoft.Sql/servers/databases",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2014-04-01-preview",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('GameStoreSQLServerName'))]"
+            ],
+            "tags": {
+                "displayName": "GameStore"
+            },
+            "properties": {
+                "collation": "[parameters('GameStoreCollation')]",
+                "edition": "[parameters('GameStoreEdition')]",
+                "maxSizeBytes": "1073741824",
+                "requestedServiceObjectiveName": "[parameters('GameStoreRequestedServiceObjectiveName')]"
+            }
+        }
+    ],
+    "outputs": {
+        "hostname": {
+            "type": "string",
+            "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
+        }
+    }
+}
